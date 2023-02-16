@@ -1,6 +1,6 @@
 package models
 
 type Role struct {
-	RoleId   int `gorm:"primaryKey"`
-	RoleName string
+	RoleId   int    `json:"role_id"`
+	RoleName string `json:"role_name"`
 }

@@ -11,25 +11,32 @@ import (
 
 type RoleController struct{}
 
-func (h *RoleController) AddRole(c *gin.Context) {
+func (r *RoleController) AddRole(c *gin.Context) {
 	role := models.Role{RoleId: 8, RoleName: "admin"}
 	response := services.RoleService{}.AddRoleService(role)
-	db := new(configs.Configs)
 	if response != "Success" {
-		c.JSON(http.StatusBadRequest, db.ResponseFailed(response))
+		c.JSON(http.StatusBadRequest, new(configs.Error).ResponseFailed(response))
 	} else {
-		c.JSON(http.StatusOK, db.ResponseSuccess(response))
+		c.JSON(http.StatusOK, new(configs.Success).ResponseSuccess(response))
 	}
 }
 
-func (h *RoleController) GetAllRoles(c *gin.Context) {
+func (r *RoleController) GetAllRoles(c *gin.Context) {
 	roles := []models.Role{}
-	response := services.RoleService{}.GetAllRolesService(roles)
-	c.JSON(http.StatusOK, response)
+	response, status := services.RoleService{}.GetAllRolesService(roles)
+	if status == 200 {
+		c.JSON(status, new(configs.SuccessData).ResponseSuccess("Success", response))
+	} else {
+		c.JSON(status, new(configs.Error).ResponseFailed("No data found"))
+	}
 }
 
-func (h *RoleController) GetRoleById(c *gin.Context) {
+func (r *RoleController) GetRoleById(c *gin.Context) {
 	role := models.Role{}
 	response, status := services.RoleService{}.GetRoleByIdService(role, c.Param("role_id"))
-	c.JSON(status, response)
+	if status == 200 {
+		c.JSON(status, new(configs.SuccessData).ResponseSuccess("Success", response))
+	} else {
+		c.JSON(status, new(configs.Error).ResponseFailed("No data found"))
+	}
 }

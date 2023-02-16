@@ -7,10 +7,11 @@ import (
 
 type RoleService struct{}
 
+var config = new(configs.Configs)
+var db = config.Connect()
+
 func (RoleService) AddRoleService(role models.Role) string {
-	db := new(configs.Configs)
-	connect := db.Connect()
-	err := connect.Create(&role).Error
+	err := db.Create(&role).Error
 	if err != nil {
 		return err.Error()
 	} else {
@@ -18,17 +19,17 @@ func (RoleService) AddRoleService(role models.Role) string {
 	}
 }
 
-func (RoleService) GetAllRolesService(role []models.Role) []models.Role {
-	db := new(configs.Configs)
-	connect := db.Connect()
-	connect.Find(&role)
-	return role
+func (RoleService) GetAllRolesService(role []models.Role) ([]models.Role, int) {
+	err := db.Find(&role).Error
+	if err != nil {
+		return role, 204
+	} else {
+		return role, 200
+	}
 }
 
 func (RoleService) GetRoleByIdService(role models.Role, id string) (models.Role, int) {
-	db := new(configs.Configs)
-	connect := db.Connect()
-	err := connect.First(&role, id).Error
+	err := db.First(&role, id).Error
 	if err != nil {
 		return role, 400
 	} else {
