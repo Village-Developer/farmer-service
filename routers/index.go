@@ -13,8 +13,6 @@ type IndexRouter struct {
 var middleware = new(middlewares.Middleware)
 var apiDocumentController = new(controllers.ApiDocumentController)
 
-var roleController = new(controllers.RoleController)
-
 /* Router Group */
 func (h *IndexRouter) SetupRouter() IndexRouter {
 	r := IndexRouter{
@@ -23,7 +21,6 @@ func (h *IndexRouter) SetupRouter() IndexRouter {
 	r.router.Use(middleware.VerifyToken())
 	v1 := r.router.Group("/api/v1")
 	ApiDocumentRouterGroup(v1)
-	RoleRouterGroup(v1)
 	return r
 }
 

@@ -23,7 +23,7 @@ type Response interface {
 func (s *Success) ResponseSuccess(message string) Success {
 	return Success{
 		Success: true,
-		Message: "message",
+		Message: message,
 	}
 }
 
