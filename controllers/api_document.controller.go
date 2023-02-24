@@ -29,8 +29,8 @@ func (ApiDocumentController) GetAllApiDocuments(c *gin.Context) {
 }
 
 func (ApiDocumentController) DeleteApiDocument(c *gin.Context) {
-	response := services.ApiDocumentService{}.DeleteApiDocumentService(c)
-	if response != "Success" {
+	response, status := services.ApiDocumentService{}.DeleteApiDocumentService(c)
+	if status != 200 {
 		c.JSON(http.StatusBadRequest, new(configs.Error).ResponseFailed(response))
 	} else {
 		c.JSON(http.StatusOK, new(configs.Success).ResponseSuccess(response))

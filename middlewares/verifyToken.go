@@ -16,7 +16,7 @@ func (m *Middleware) VerifyToken() gin.HandlerFunc {
 		/* Get Token From Header */
 		json := []byte(`{"token": "` + c.Request.Header.Get("Authorization") + `"}`)
 		/* Call API Verify Token */
-		// response, err := http.Post("http://farmer-backend-test:9000/api/v1/verify", "application/json", bytes.NewBuffer(json))
+		// response, _ := http.Post("http://farmer-backend-test:9000/api/v1/verify", "application/json", bytes.NewBuffer(json))
 		response, _ := http.Post("http://localhost:9000/api/v1/verify", "application/json", bytes.NewBuffer(json))
 		/* Check Response */
 		if response.StatusCode == 200 {

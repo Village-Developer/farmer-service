@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"village-developer.com/farmer/configs"
 	"village-developer.com/farmer/models"
+	"village-developer.com/farmer/models/responses"
 )
 
 type ApiDocumentService struct{}
@@ -39,18 +40,26 @@ func (ApiDocumentService) AddApiDocumentProjectService(c *gin.Context) (string, 
 	}
 }
 
-func (ApiDocumentService) GetAllApiDocumentService(c *gin.Context) ([]models.ApiProject, int) {
+func (ApiDocumentService) GetAllApiDocumentService(c *gin.Context) ([]responses.ApiProjectResponse, int) {
 	user_id := c.Request.Header.Get("user_id")
-	project := []models.ApiProject{}
-	group := []models.ApiGroup{}
-	api := []models.ApiDocument{}
+
+	project := []responses.ApiProjectResponse{}
+	group := []responses.ApiGroupResponse{}
+	api := []responses.ApiDocumentResponse{}
 	db.Table("api_projects").Select("*").Joins("left join api_permissions on api_projects.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&project)
 	db.Table("api_groups").Select("*").Joins("left join api_permissions on api_groups.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&group)
 	db.Table("api_documents").Select("*").Joins("left join api_permissions on api_documents.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&api)
 	for i := 0; i < len(project); i++ {
 		for j := 0; j < len(group); j++ {
 			if *project[i].ApiProjectId == *group[j].ApiProjectId {
-				project[i].ApiGroups = append(project[i].ApiGroups, group[j])
+				for k := 0; k < len(api); k++ {
+					if api[k].ApiGroupId != nil {
+						if *group[j].ApiGroupId == *api[k].ApiGroupId {
+							group[j].ApiGroups = append(group[j].ApiGroups, api[k])
+							project[i].ApiGroups = append(project[i].ApiGroups, group[j])
+						}
+					}
+				}
 			}
 		}
 		for k := 0; k < len(api); k++ {
@@ -59,18 +68,17 @@ func (ApiDocumentService) GetAllApiDocumentService(c *gin.Context) ([]models.Api
 			}
 		}
 	}
-
 	return project, 200
 }
 
-func (ApiDocumentService) DeleteApiDocumentService(c *gin.Context) string {
+func (ApiDocumentService) DeleteApiDocumentService(c *gin.Context) (string, int) {
 	id := c.Param("id")
 	db.Where("api_project_id = ?", id).Delete(&models.ApiPermission{})
 	err := db.Where("api_project_id = ?", id).Delete(&models.ApiProject{}).Error
 	if err != nil {
-		return err.Error()
+		return err.Error(), 400
 	} else {
-		return "Delete Success"
+		return "Delete Success", 200
 	}
 }
 

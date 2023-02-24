@@ -18,6 +18,7 @@ func (h *IndexRouter) SetupRouter() IndexRouter {
 	r := IndexRouter{
 		router: gin.Default(),
 	}
+	r.router.Use(middleware.CORSMiddleware())
 	r.router.Use(middleware.VerifyToken())
 	v1 := r.router.Group("/api/v1")
 	ApiDocumentRouterGroup(v1)
