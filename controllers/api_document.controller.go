@@ -28,8 +28,8 @@ func (ApiDocumentController) GetAllApiDocuments(c *gin.Context) {
 	}
 }
 
-func (ApiDocumentController) DeleteApiDocument(c *gin.Context) {
-	response, status := services.ApiDocumentService{}.DeleteApiDocumentService(c)
+func (ApiDocumentController) DeleteApiDocumentProject(c *gin.Context) {
+	response, status := services.ApiDocumentService{}.DeleteApiDocumentProjectService(c)
 	if status != 200 {
 		c.JSON(http.StatusBadRequest, new(configs.Error).ResponseFailed(response))
 	} else {
@@ -48,6 +48,24 @@ func (ApiDocumentController) AddApiDocumentGroup(c *gin.Context) {
 
 func (ApiDocumentController) AddApiDocuments(c *gin.Context) {
 	response, status := services.ApiDocumentService{}.AddApiDocumentsService(c)
+	if status != 200 {
+		c.JSON(http.StatusBadRequest, new(configs.Error).ResponseFailed(response))
+	} else {
+		c.JSON(http.StatusOK, new(configs.Success).ResponseSuccess(response))
+	}
+}
+
+func (ApiDocumentController) DeleteApiDocumentGroup(c *gin.Context) {
+	response, status := services.ApiDocumentService{}.DeleteApiDocumentGroupService(c)
+	if status != 200 {
+		c.JSON(http.StatusBadRequest, new(configs.Error).ResponseFailed(response))
+	} else {
+		c.JSON(http.StatusOK, new(configs.Success).ResponseSuccess(response))
+	}
+}
+
+func (ApiDocumentController) DeleteApiDocument(c *gin.Context) {
+	response, status := services.ApiDocumentService{}.DeleteApiDocumentService(c)
 	if status != 200 {
 		c.JSON(http.StatusBadRequest, new(configs.Error).ResponseFailed(response))
 	} else {

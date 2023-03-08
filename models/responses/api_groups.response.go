@@ -5,5 +5,6 @@ type ApiGroupResponse struct {
 	ApiGroupName  string                `json:"name"`
 	ApiProjectId  *string               `json:"project_id"`
 	ParentGroupId *string               `json:"group_id"`
+	Type          string                `json:"type" gorm:"-"`
 	ApiGroups     []ApiDocumentResponse `json:"children" gorm:"-"`
 }

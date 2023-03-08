@@ -50,19 +50,29 @@ func (ApiDocumentService) GetAllApiDocumentService(c *gin.Context) ([]responses.
 	db.Table("api_groups").Select("*").Joins("left join api_permissions on api_groups.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&group)
 	db.Table("api_documents").Select("*").Joins("left join api_permissions on api_documents.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&api)
 	for i := 0; i < len(project); i++ {
+		project[i].Type = "project"
+		if project[i].ApiGroups == nil {
+			project[i].ApiGroups = []interface{}{}
+		}
 		for j := 0; j < len(group); j++ {
+			group[j].Type = "group"
+			if group[j].ApiGroups == nil {
+				group[j].ApiGroups = []responses.ApiDocumentResponse{}
+			}
 			if *project[i].ApiProjectId == *group[j].ApiProjectId {
 				for k := 0; k < len(api); k++ {
+					api[k].Type = "api"
 					if api[k].ApiGroupId != nil {
 						if *group[j].ApiGroupId == *api[k].ApiGroupId {
 							group[j].ApiGroups = append(group[j].ApiGroups, api[k])
-							project[i].ApiGroups = append(project[i].ApiGroups, group[j])
 						}
 					}
 				}
+				project[i].ApiGroups = append(project[i].ApiGroups, group[j])
 			}
 		}
 		for k := 0; k < len(api); k++ {
+			api[k].Type = "api"
 			if *project[i].ApiProjectId == *api[k].ApiProjectId && api[k].ApiGroupId == nil {
 				project[i].ApiGroups = append(project[i].ApiGroups, api[k])
 			}
@@ -71,8 +81,10 @@ func (ApiDocumentService) GetAllApiDocumentService(c *gin.Context) ([]responses.
 	return project, 200
 }
 
-func (ApiDocumentService) DeleteApiDocumentService(c *gin.Context) (string, int) {
-	id := c.Param("id")
+func (ApiDocumentService) DeleteApiDocumentProjectService(c *gin.Context) (string, int) {
+	id := c.Param("api_project_id")
+	db.Where("api_project_id = ?", id).Delete(&models.ApiDocument{})
+	db.Where("api_project_id = ?", id).Delete(&models.ApiGroup{})
 	db.Where("api_project_id = ?", id).Delete(&models.ApiPermission{})
 	err := db.Where("api_project_id = ?", id).Delete(&models.ApiProject{}).Error
 	if err != nil {
@@ -136,5 +148,26 @@ func (ApiDocumentService) AddApiDocumentsService(c *gin.Context) (string, int) {
 		return err.Error(), 400
 	} else {
 		return "Insert Success", 200
+	}
+}
+
+func (ApiDocumentService) DeleteApiDocumentGroupService(c *gin.Context) (string, int) {
+	id := c.Param("api_group_id")
+	db.Where("api_group_id = ?", id).Delete(&models.ApiDocument{})
+	err := db.Where("api_group_id = ?", id).Delete(&models.ApiGroup{}).Error
+	if err != nil {
+		return err.Error(), 400
+	} else {
+		return "Delete Success", 200
+	}
+}
+
+func (ApiDocumentService) DeleteApiDocumentService(c *gin.Context) (string, int) {
+	id := c.Param("api_document_id")
+	err := db.Where("api_document_id = ?", id).Delete(&models.ApiDocument{}).Error
+	if err != nil {
+		return err.Error(), 400
+	} else {
+		return "Delete Success", 200
 	}
 }

@@ -9,4 +9,5 @@ type ApiDocumentResponse struct {
 	Path            string  `json:"-"`
 	Description     string  `json:"-"`
 	Feature         string  `json:"-"`
+	Type            string  `json:"type" gorm:"-"`
 }
