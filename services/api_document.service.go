@@ -46,9 +46,9 @@ func (ApiDocumentService) GetAllApiDocumentService(c *gin.Context) ([]responses.
 	project := []responses.ApiProjectResponse{}
 	group := []responses.ApiGroupResponse{}
 	api := []responses.ApiDocumentResponse{}
-	db.Table("api_projects").Select("*").Joins("left join api_permissions on api_projects.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&project)
-	db.Table("api_groups").Select("*").Joins("left join api_permissions on api_groups.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&group)
-	db.Table("api_documents").Select("*").Joins("left join api_permissions on api_documents.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Scan(&api)
+	db.Table("api_projects").Select("*").Joins("left join api_permissions on api_projects.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Order("api_projects.api_project_name ASC").Scan(&project)
+	db.Table("api_groups").Select("*").Joins("left join api_permissions on api_groups.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Order("api_groups.api_group_name ASC").Scan(&group)
+	db.Table("api_documents").Select("*").Joins("left join api_permissions on api_documents.api_project_id = api_permissions.api_project_id").Where("api_permissions.user_id = ?", user_id).Order("api_documents.api_document_name ASC").Scan(&api)
 	for i := 0; i < len(project); i++ {
 		project[i].Type = "project"
 		if project[i].ApiGroups == nil {
