@@ -72,3 +72,12 @@ func (ApiDocumentController) DeleteApiDocument(c *gin.Context) {
 		c.JSON(http.StatusOK, new(configs.Success).ResponseSuccess(response))
 	}
 }
+
+func (ApiDocumentController) GetApiDocument(c *gin.Context) {
+	response, status := services.ApiDocumentService{}.GetApiDocumentService(c)
+	if status == 200 {
+		c.JSON(status, new(configs.SuccessData).ResponseSuccess("Success", response[0]))
+	} else {
+		c.JSON(status, new(configs.Error).ResponseFailed("No data found"))
+	}
+}

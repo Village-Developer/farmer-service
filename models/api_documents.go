@@ -7,6 +7,4 @@ type ApiDocument struct {
 	ApiGroupId      *string `json:"api_group_id"`
 	Method          string  `json:"method"`
 	Path            string  `json:"path"`
-	Description     string  `json:"description"`
-	Feature         string  `json:"feature"`
 }

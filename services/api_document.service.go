@@ -142,7 +142,7 @@ func (ApiDocumentService) AddApiDocumentsService(c *gin.Context) (string, int) {
 	var body map[string]interface{}
 	json.Unmarshal(jsonData, &body)
 	fmt.Println(body)
-	document := models.ApiDocument{ApiDocumentName: body["api_document_name"].(string), ApiProjectId: project_id, ApiGroupId: parent_id, Method: body["method"].(string), Path: body["path"].(string), Description: body["description"].(string), Feature: body["feature"].(string)}
+	document := models.ApiDocument{ApiDocumentName: body["api_document_name"].(string), ApiProjectId: project_id, ApiGroupId: parent_id, Method: body["method"].(string), Path: body["path"].(string)}
 	err = db.Create(&document).Error
 	if err != nil {
 		return err.Error(), 400
@@ -169,5 +169,118 @@ func (ApiDocumentService) DeleteApiDocumentService(c *gin.Context) (string, int)
 		return err.Error(), 400
 	} else {
 		return "Delete Success", 200
+	}
+}
+
+func (ApiDocumentService) GetApiDocumentService(c *gin.Context) ([]responses.ApiDocumentDetailResponse, int) {
+	id := c.Param("api_document_id")
+	var document models.ApiDocument
+	features := []models.ApiFeature{}
+	headers := []models.ApiHeader{}
+	query_params := []models.ApiQueryParams{}
+	path_variable := []models.ApiPathVariable{}
+	body := []models.ApiBody{}
+	body_raw := []models.ApiBodyRaw{}
+	api_response := []models.ApiResponse{}
+	err := db.Where("api_document_id = ?", id).First(&document).Error
+	db.Where("api_document_id = ?", id).Find(&features)
+	db.Where("api_document_id = ?", id).Find(&headers)
+	db.Where("api_document_id = ?", id).Find(&query_params)
+	db.Where("api_document_id = ?", id).Find(&path_variable)
+	db.Where("api_document_id = ?", id).Find(&api_response)
+	db.Where("api_document_id = ?", id).Table("api_body").Scan(&body)
+	db.Where("api_document_id = ?", id).Table("api_body_raw").Scan(&body_raw)
+	if err != nil {
+		return nil, 400
+	} else {
+		var response responses.ApiDocumentDetailResponse
+		featureResponses := []responses.ApiFeatureResponse{}
+		headerResponses := []responses.ApiHeaderResponse{}
+		queryParamResponses := []responses.ApiQueryParamsResponse{}
+		pathVariableResponses := []responses.ApiPathVariableResponse{}
+		apiResponses := []responses.ApiResponse{}
+		bodyResponses := []responses.ApiBodyResponse{}
+		bodyRawResponses := []responses.ApiBodyRawResponse{}
+
+		for _, feature := range features {
+			var featureResponseItem responses.ApiFeatureResponse
+			featureResponseItem.ApiDocumentId = feature.ApiDocumentId
+			featureResponseItem.Number = feature.Number
+			featureResponseItem.Feature = feature.Feature
+			featureResponses = append(featureResponses, featureResponseItem)
+		}
+
+		for _, header := range headers {
+			var headerResponseItem responses.ApiHeaderResponse
+			headerResponseItem.ApiDocumentId = header.ApiDocumentId
+			headerResponseItem.Number = header.Number
+			headerResponseItem.HeaderName = header.HeaderName
+			headerResponseItem.HeaderValue = header.HeaderValue
+			headerResponseItem.Description = header.Description
+			headerResponses = append(headerResponses, headerResponseItem)
+		}
+
+		for _, query_param := range query_params {
+			var queryParamResponseItem responses.ApiQueryParamsResponse
+			queryParamResponseItem.ApiDocumentId = query_param.ApiDocumentId
+			queryParamResponseItem.Number = query_param.Number
+			queryParamResponseItem.QueryParamName = query_param.QueryParamName
+			queryParamResponseItem.QueryParamValue = query_param.QueryParamValue
+			queryParamResponseItem.Description = query_param.Description
+			queryParamResponses = append(queryParamResponses, queryParamResponseItem)
+		}
+
+		for _, path_variable := range path_variable {
+			var pathVariableResponseItem responses.ApiPathVariableResponse
+			pathVariableResponseItem.ApiDocumentId = path_variable.ApiDocumentId
+			pathVariableResponseItem.Number = path_variable.Number
+			pathVariableResponseItem.PathVariableName = path_variable.PathVariableName
+			pathVariableResponseItem.PathVariableValue = path_variable.PathVariableValue
+			pathVariableResponseItem.Description = path_variable.Description
+			pathVariableResponses = append(pathVariableResponses, pathVariableResponseItem)
+		}
+
+		for _, response := range api_response {
+			var responseResponseItem responses.ApiResponse
+			responseResponseItem.ApiDocumentId = response.ApiDocumentId
+			responseResponseItem.Number = response.Number
+			responseResponseItem.StatusCode = response.StatusCode
+			responseResponseItem.Body = response.ResponseBody
+			responseResponseItem.Description = response.Description
+			apiResponses = append(apiResponses, responseResponseItem)
+		}
+
+		for _, body := range body {
+			var bodyResponseItem responses.ApiBodyResponse
+			bodyResponseItem.ApiDocumentId = body.ApiDocumentId
+			bodyResponseItem.Number = body.Number
+			bodyResponseItem.ApiBodyName = body.ApiBodyName
+			bodyResponseItem.ApiBodyValue = body.APiBodyValue
+			bodyResponseItem.Description = body.ApiBodyDescription
+			bodyResponses = append(bodyResponses, bodyResponseItem)
+		}
+
+		for _, body_raw := range body_raw {
+			var bodyRawResponseItem responses.ApiBodyRawResponse
+			bodyRawResponseItem.ApiDocumentId = body_raw.ApiDocumentId
+			bodyRawResponseItem.Body = body_raw.Body
+			bodyRawResponseItem.Description = body_raw.Description
+			bodyRawResponseItem.ContentType = body_raw.ContentType
+			bodyRawResponses = append(bodyRawResponses, bodyRawResponseItem)
+		}
+
+		response.ApiDocumentId = document.ApiDocumentId
+		response.ApiDocumentName = document.ApiDocumentName
+		response.Method = document.Method
+		response.Url = document.Path
+		response.Features = featureResponses
+		response.Headers = headerResponses
+		response.QueryParams = queryParamResponses
+		response.PathVariables = pathVariableResponses
+		response.Responses = apiResponses
+		response.Body = bodyResponses
+		response.BodyRaw = bodyRawResponses
+
+		return []responses.ApiDocumentDetailResponse{response}, 200
 	}
 }

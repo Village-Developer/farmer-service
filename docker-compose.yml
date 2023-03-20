@@ -1,0 +1,14 @@
+services:
+  backend:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    container_name: farmer-service
+    restart: always
+    ports:
+        - "9100:9100"
+    networks:
+        -  database_default
+networks:
+  database_default:
+        external: true
